@@ -1,115 +1,120 @@
-%%hw 1.2: Create a 3D cloud of points from a range image
+% Homework 2 -- Create a 3D cloud of points from a range image
+clear all; close all; clc;
 
-close all;
-clear;
-clc;
-
-% range image
-im=imread('0000001-000000000000.png');
-figure(1)
-imagesc(im);
-saveas(gcf,'range_image.png')
+depth = int32(imread('0000001-000000000000.png'));
+rgb = int32(imread('0000001-000000000000.jpg'));
 
 
-% coordinates of the principle point and the focal length in x and y
-fx=525;
-cx=319.5;
-fy=525;
-cy=239.5;
+[row, column] = size(depth);
 
-numRow=size(im,1);
-numCol=size(im,2);
-cloud=zeros(numRow*numCol,3);
+% The focal length fu and fv is 525 for both, data from  PrimeSense Carmine cameras
 
+fu = 525;
+fv = 525;
 
-X=zeros(numRow,numCol);
-Y=zeros(numRow,numCol);
-TRUE=zeros(numRow,numCol);
+% Principal point 
+uo = 319.5;
+vo = 239.5;
 
-%number of point I will consider, not all points in the range image are
-%specified, some may be 0
+figure(1);
+colormap jet;
+imagesc(depth);
 
-k=0;
-thresh=4000;
+indexmap = zeros(row, column);
+pointCloud = [];
+colors = [];
+index = 1;
 
-for i=1:1:numCol
-    for j=1:1:numRow
-        %compute the 3d coordinate X and Y
-        X(j,i) = -(i-cx) *double(im(j,i))/fx;
-        Y(j,i) = -(j-cy) *double(im(j,i))/fy;
-        % not all the points of the range image are not encoded, discard
-        % the ones which are 0 and the ones not usefull using a  threshold
-        if(im(j,i)~=0 && im(j,i)<thresh)
-            TRUE(j,i)=1;
-            k=k+1;
-            cloud(k,:)=[X(j,i) Y(j,i) double(im(j,i))];
+x_im = zeros(size(depth));
+y_im = zeros(size(depth));
+
+for u = 1:1:row
+    for v = 1:1:column
+        z = depth(u,v);
+        
+        % Discard the range map too close 
+        if z == 0
+            continue;
         end
+        
+        % Inverse of the formula on the slide
+        x_im = -((depth(u,v)*(u - uo))/fu);
+        y_im = -((depth(u,v)*(v - vo))/fv);
+        
+        % Collecting cloud of points
+        pointCloud = [pointCloud; [x_im y_im -z]];
+        % Collecting colors
+        colors = [colors; rgb(u,v)];
+        
+        % Save index of cloud, needs for next assignment 
+        indexmap(u, v) = index;
+        index = index +1;   
     end
 end
 
-%We take only the k points we have considered meaningfull
-cloud2=cloud(1:k,:);
 figure(2)
-%Plot in 3d
-plot3(cloud2(:,1), cloud2(:,2), cloud2(:,3), 'r.','Markersize', 1);
-axis equal
-saveas(gcf,'cloud_points.png')
+plot3(pointCloud(:,1), pointCloud(:,2), pointCloud(:,3),'r.');
+%% Homowork 3 -- Mesh reconstruction from range image
 
+faces = [];
+t = 7;
 
-%% store the cloud of points in a file Ply
-npoint=size(cloud2,1);
-Triangle=[];
-exportMeshToPly(cloud2,Triangle,ones(npoint,3),'PC_out');
-
-
-%% hw 1.3: Mesh reconstruction from range image
-
-% Does not work because you have considered the distance in the range
-% image, you have to consider the distance between the corresponding 3d
-% points, so taking to points of the range, compute the corresponding 3d
-% poitns and check if their distance is below the given threshold
-clc;
-Triangles=[];
-cloud3=zeros(numRow*numCol,3);
-k=3;
-maxEdgeLength=1;
-for i=1:size(X,2)-1
-    for j=1:size(X,1)-1
-        if(im(j,i)~=0 && im(j,i)<thresh && im(j,i+1)~=0 && im(j,i+1)<thresh && im(j+1,i)~=0 && im(j+1,i)<thresh)
-            if(abs(im(j,i)-im(j+1,i))<maxEdgeLength && abs(im(j,i)-im(j,i+1))<maxEdgeLength && abs(im(j,i+1)-im(j+1,i))<maxEdgeLength)
-                
-                cloud3(k/3,:)=[X(j,i) Y(j,i) double(im(j,i))];
-                cloud3(k/3+1,:)=[X(j+1,i) Y(j+1,i) double(im(j+1,i))];
-                cloud3(k/3+2,:)=[X(j,i+1) Y(j,i+1) double(im(j,i+1))];
-               
-                Triangles(k/3,:)=[k/3, k/3+1, k/3+2];
-                k=k+3;
-%                 Triangles(:,end+1)=[X(j,i);Y(j,i);double(im(j,i))];
-%                 Triangles(:,end+1)=[X(j+1,i);Y(j+1,i);double(im(j+1,i))];
-%                 Triangles(:,end+1)=[X(j,i+1);Y(j,i+1);double(im(j,i+1))];
-                
+for u = 1:row - 1
+    for v = 1: column - 1
+        z = depth(u,v);
+        
+        % Discard the range map too close -- We avoid to control the point A 
+        if z == 0
+            continue
+        end
+       
+       % Collect the indeces
+       v_or = v + 1;
+       u_ver = u + 1;
+       in_diag_u = u_ver;
+       in_diag_v = v_or;
+       
+       % Create the 4 verteces of the rectangle 
+        A = indexmap(u,v);
+        B = indexmap(u_ver,v);
+        C = indexmap(u, v_or);
+        D = indexmap(in_diag_u, in_diag_v);
+        
+        % We don't have both the upper and lower triangle
+        if B == 0 || C == 0 
+            continue
+        end
+        
+        % we could have the upper triangle
+        if D == 0
+            seg1 = point2point_distance(double(pointCloud(A,:)), double(pointCloud(B,:)));
+            seg2 = point2point_distance(double(pointCloud(A,:)), double(pointCloud(C,:)));
+            seg5 = point2point_distance(double(pointCloud(B,:)), double(pointCloud(C,:)));
+            
+            if seg1 < t || seg2< t || seg5 < t
+                faces = [faces; [A B C]];
+            end
+            
+        else
+            
+            % we could have both the upper and lower triangle
+            seg1 = point2point_distance(double(pointCloud(A,:)), double(pointCloud(B,:)));
+            seg2 = point2point_distance(double(pointCloud(A,:)), double(pointCloud(C,:)));
+            seg3 = point2point_distance(double(pointCloud(B,:)), double(pointCloud(D,:)));
+            seg4 = point2point_distance(double(pointCloud(C,:)), double(pointCloud(D,:)));
+            seg5 = point2point_distance(double(pointCloud(B,:)), double(pointCloud(C,:)));
+        
+            if seg1 < t || seg2< t || seg5 < t
+                faces = [faces; [A B C]];
+            elseif seg3 < t || seg4< t || seg5 < t
+                faces = [faces; [B C D]];
             end
         end
         
-        if(im(j+1,i+1)~=0 && im(j+1,i+1)<thresh && im(j,i+1)~=0 && im(j,i+1)<thresh && im(j+1,i)~=0 && im(j+1,i)<thresh)
-            if(abs(im(j+1,i+1)-im(j+1,i))<maxEdgeLength && abs(im(j+1,i+1)-im(j,i+1))<maxEdgeLength && abs(im(j,i+1)-im(j+1,i))<maxEdgeLength)
-                
-                cloud3(k/3,:)=[X(j+1,i+1) Y(j+1,i+1) double(im(j+1,i+1))];
-                cloud3(k/3+1,:)=[X(j+1,i) Y(j+1,i) double(im(j+1,i))];
-                cloud3(k/3+2,:)=[X(j,i+1) Y(j,i+1) double(im(j,i+1))];
-               
-                Triangles(k/3,:)=[k/3, k/3+1, k/3+2];
-                k=k+3;
-%                 Triangles(:,end+1)=[X(j,i);Y(j,i);double(im(j,i))];
-%                 Triangles(:,end+1)=[X(j+1,i);Y(j+1,i);double(im(j+1,i))];
-%                 Triangles(:,end+1)=[X(j,i+1);Y(j,i+1);double(im(j,i+1))];
-                
-            end
-        end
     end
+    
 end
 
-% cloud4=cloud3(1:(k/3),:);
-cloud4=cloud3;
-npoint=size(cloud4,1);
-exportMeshToPly(cloud4,Triangles,ones(npoint,3),'PC_out_range');
+
+exportMeshToPly(pointCloud, faces , colors, 'mesh_es1_3');
+
