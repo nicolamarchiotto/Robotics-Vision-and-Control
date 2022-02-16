@@ -5,15 +5,15 @@
 clc;
 clear
 
-qi=0;
-qf=-10;
+qi=5;
+qf=2;
 
 Ts=0.01;
 
 ti=0;
 
-dqi=3;
-dqf=-3;
+dqi=0;
+dqf=1;
 
 dqmax=5;
 ddqmax=10;

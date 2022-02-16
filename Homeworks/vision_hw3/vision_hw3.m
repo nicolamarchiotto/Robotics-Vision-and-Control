@@ -14,6 +14,7 @@ close all;
 points=getCloudPoints(false);
 ptCloud=pointCloud(points);
 
+% Fit plane to a 3-D point cloud.
 [model] = pcfitplane(ptCloud,10);
 
 a=model.Parameters(1);
@@ -29,7 +30,7 @@ z = -1/c*(a*x + b*y + d); % Solve for z data
 
 
 % GET CONTOUR POINTS
-[contourPoints,centroid]=getContourCloudPoints(false);
+[contourPoints,centroid]=getContourCloudPoints(true);
 
 figure
 %plot cloud points

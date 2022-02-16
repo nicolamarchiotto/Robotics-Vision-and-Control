@@ -6,6 +6,8 @@
 
 % function [trajPosition, trajVelocity, trajAcc, trajTime]=homework9_main(showPlots)
 
+% code to run in folder hw9
+
 clc;
 clear;
 close all;
@@ -124,7 +126,7 @@ ti=0;
 tf=10;
 Ts=0.01;
 timeSup=ti:Ts:tf;
-[s,ds,dds]=trajectory_5th_ti_tf(0,pathLength,0,0,0,0,ti,tf,Ts);
+[s,ds,dds]=copy_of_trajectory_5th_ti_tf(0,pathLength,0,0,0,0,ti,tf,Ts);
 
 posSup=robotStartPosition-s.*((robotStartPosition-order(:,1))/pathLength);
 velSup=ds.*((robotStartPosition-order(:,1))/pathLength);
@@ -176,7 +178,7 @@ R=[xAxCirc,yAxCirc,zAxCirc];
 ti=10;
 tf=20;
 timeSup=ti:Ts:tf;
-[s,ds,dds]=trajectory_5th_ti_tf(0,arcLenght,0,0,0,0,ti,tf,Ts);
+[s,ds,dds]=copy_of_trajectory_5th_ti_tf(0,arcLenght,0,0,0,0,ti,tf,Ts);
 posSup=sphereCentre+R*[sphereRadious*cos(s/sphereRadious);sphereRadious*sin(s/sphereRadious);zeros(1,size(s,2))];
 velSup=R*[-ds.*sin(s/sphereRadious);ds.*cos(s/sphereRadious);zeros(1,size(s,2))];
 accSup=R*[-ds.^2.*cos(s/sphereRadious)/sphereRadious-dds.*sin(s/sphereRadious);-ds.^2.*sin(s/sphereRadious)/sphereRadious+dds.*cos(s/sphereRadious);zeros(1,size(s,2))];
@@ -236,7 +238,7 @@ R=[xAxCirc,yAxCirc,zAxCirc];
 ti=20;
 tf=30;
 timeSup=ti:Ts:tf;
-[s,ds,dds]=trajectory_5th_ti_tf(0,arcLenght,0,0,0,0,ti,tf,Ts);
+[s,ds,dds]=copy_of_trajectory_5th_ti_tf(0,arcLenght,0,0,0,0,ti,tf,Ts);
 posSup=sphereCentre+R*[sphereRadious*cos(s/sphereRadious);sphereRadious*sin(s/sphereRadious);zeros(1,size(s,2))];
 velSup=R*[-ds.*sin(s/sphereRadious);ds.*cos(s/sphereRadious);zeros(1,size(s,2))];
 accSup=R*[-ds.^2.*cos(s/sphereRadious)/sphereRadious-dds.*sin(s/sphereRadious);-ds.^2.*sin(s/sphereRadious)/sphereRadious+dds.*cos(s/sphereRadious);zeros(1,size(s,2))];
@@ -279,7 +281,7 @@ for i=1:size(eulAngles,2)-1
     tf=10+(i-1)*10;
     angI=eulAngles(:,i);
     angF=eulAngles(:,i+1);
-    [s,ds,dds]=trajectory_5th_ti_tf(0,norm(angF-angI),0,0,0,0,ti,tf,Ts);
+    [s,ds,dds]=copy_of_trajectory_5th_ti_tf(0,norm(angF-angI),0,0,0,0,ti,tf,Ts);
     angPosSup=angI+s.*((angF-angI)/(norm(angF-angI)));
     angVelSup=ds.*((angF-angI)/(norm(angF-angI)));
     angAccSup=dds.*((angF-angI)/(norm(angF-angI)));

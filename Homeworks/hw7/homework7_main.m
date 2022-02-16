@@ -1,6 +1,15 @@
 %% Homework 7
 % Model based trajectory planning
 
+%% IMPORTANT
+%In order to be able to run the following code you will have to add to path
+%the whole MatlabScipts folder with subfolders, if your current folder is hw7 you can
+%execute the following command to do so
+
+addpath('../../../MatlabScripts')
+addpath('../../../MatlabScripts/Homeworks/hw6')
+
+
 %% Computation of the initial trajectory and the relative torques
 
 clc;
@@ -44,7 +53,6 @@ dh.I(:,:,5) = [i5(1) 0 0; 0 i5(2) 0; 0 0 i5(3)];
 dh.I(:,:,6) = [i6(1) 0 0; 0 i6(2) 0; 0 0 i6(3)];
 
 %we must have 6 trajectories for the given 6 dof, so 6 pos, 6 vel and 6 acc
-clc;
 
 tk=[1 2 3 4 5 6 7 8 9 10];
 Ts=0.01;
@@ -52,7 +60,7 @@ Ts=0.01;
 n=size(tk,2);
 t=tk(1):Ts:tk(n);
 
-% gravity=[0 0 9.81]';
+%gravity=[0 0 9.81]';
 gravity=[0 0 0]';
 
 QK=zeros(6,tk(size(tk,2)));
@@ -147,6 +155,9 @@ tau3_max=2;
 tau4_max=5;
 tau5_max=5;
 tau6_max=5;
+
+%scaling factor used to increase or decrease the duration in order to allow
+%for at leat one torque to be equal to the maximum value
 
 lamba=sqrt(min([tau1_max/max(abs(TAU(1,:))),tau2_max/max(abs(TAU(2,:))),tau3_max/max(abs(TAU(3,:))),tau4_max/max(abs(TAU(4,:))),tau5_max/max(abs(TAU(5,:))),tau6_max/max(abs(TAU(6,:)))]));
 

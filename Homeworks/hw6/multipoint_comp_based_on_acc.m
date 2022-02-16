@@ -114,14 +114,6 @@ if(show_plot)
     subplot(4,1,2);
     plot(t,dq)
     hold on
-%     if(tk(1)==0)
-%         plot(0,dq(1), '*', 'markerSize', 4, 'color', 'r')
-%     else
-%         plot(tk(1),dq(1), '*', 'markerSize', 4, 'color', 'r')
-%     end
-%     for j=2:size(tk,2)
-%         plot(tk(j),dq(tk(j)/Ts), '*', 'markerSize', 4, 'color', 'r')
-%     end
     xlabel('time [sec]')
     ylabel('Velocity [rad/s]')
     xlim([tk(1) tk(n)])

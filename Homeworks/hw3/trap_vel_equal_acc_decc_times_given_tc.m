@@ -1,4 +1,4 @@
-function [q,dq,ddq]=trap_vel_equal_acc_decc_times_given_tc(qi,qf,ti,tf,Ts,tc,showPlots)
+    function [q,dq,ddq]=trap_vel_equal_acc_decc_times_given_tc(qi,qf,ti,tf,Ts,tc,showPlots)
 
 sigma=sign(qf-qi);
 

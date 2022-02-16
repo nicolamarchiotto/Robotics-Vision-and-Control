@@ -59,8 +59,8 @@ centroid(2)=-(floor(centroidY_index)-cy) *double(imageSup(floor(centroidY_index)
 centroid(3)=double(imageSup(floor(centroidY_index),floor(centroidX_index)));
 
 
+%contourc computes the contour matrix C for use by CONTOUR
 Contour=contourc(double(BW2), [1 1]);
-% [Contour]=imcontour(BW2);
 
 % computation of the cloud of points related to contour
 imContour=zeros(numRow,numCol);

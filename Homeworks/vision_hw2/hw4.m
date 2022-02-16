@@ -1,3 +1,4 @@
+%% Use morphological operators and region properties to infer informations on an image chosen by you
 clc;
 clear;
 

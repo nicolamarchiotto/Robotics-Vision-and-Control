@@ -1,3 +1,5 @@
+%% Use morphological operators and region properties to infer informations
+
 clc;
 clear;
 

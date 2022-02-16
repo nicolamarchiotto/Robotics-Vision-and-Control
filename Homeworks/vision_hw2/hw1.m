@@ -7,15 +7,22 @@ subplot(2,2,1)
 imshow(I);
 title('Selected image')
 
+
 bw = imbinarize(I);
+
+%bwareaopen(BW,P) removes from a binary image all connected 
+% components that have fewer than P pixels,
 bw = bwareaopen(bw,50);
 bw = imcomplement(bw);
+
+%strel Create morphological structuring element
 se = strel('disk',5);
+
+%The morphological close operation is a dilation followed by an erosion,
 bw = imclose(bw,se);
 subplot(2,2,2)
 imshow(bw);
 title('Image after morphologial operations')
-
 
 cc = bwconncomp(bw,4);
 
